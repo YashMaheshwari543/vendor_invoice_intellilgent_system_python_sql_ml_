@@ -12,9 +12,7 @@ MODEL_PATH = (
 
 
 def load_model(model_path=MODEL_PATH):
-    """
-    Load trained freight cost prediction model.
-    """
+    """Load trained freight cost prediction model."""
     with open(model_path, "rb") as f:
         model = joblib.load(f)
 
@@ -22,41 +20,20 @@ def load_model(model_path=MODEL_PATH):
 
 
 def predict_freight_cost(input_data):
-    """
-    Predict freight cost for a new vendor invoice.
-
-    Accepts either:
-    - pandas DataFrame
-    - dictionary
-    """
+    """Predict freight cost using Invoice Dollars."""
 
     model = load_model()
 
-    # If app.py sends a DataFrame
+    # The trained model uses only the Dollars feature.
     if isinstance(input_data, pd.DataFrame):
         input_df = input_data[["Dollars"]].copy()
-
-    # If called with a dictionary
     else:
         input_df = pd.DataFrame({
             "Dollars": input_data["Dollars"]
         })
 
-    # Generate prediction
-    prediction = model.predict(input_df)[0].round()
+    prediction = model.predict(input_df)[0]
 
     return {
-        "Predicted_Freight": prediction
+        "Predicted_Freight": round(float(prediction), 2)
     }
-
-
-if __name__ == "__main__":
-
-    # Example local testing
-    sample_data = {
-        "Dollars": [18500]
-    }
-
-    prediction = predict_freight_cost(sample_data)
-
-    print(prediction)
